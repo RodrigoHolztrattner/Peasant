@@ -1,0 +1,17 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: PeasantSystem.cpp
+////////////////////////////////////////////////////////////////////////////////
+#include "PeasantSystem.h"
+
+// Using namespace Peasant
+PeasantUsingDevelopmentNamespace(Peasant)
+
+PeasantSystem::PeasantSystem()
+{
+	// Set the initial data
+	// ...
+}
+
+PeasantSystem::~PeasantSystem()
+{
+}

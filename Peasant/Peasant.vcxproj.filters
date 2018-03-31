@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Peasant.cpp" />
+    <ClCompile Include="PeasantSystem.cpp" />
+    <ClCompile Include="PeasantObject.cpp" />
+    <ClCompile Include="PeasantStorage.cpp" />
+    <ClCompile Include="PeasantInstance.cpp" />
+    <ClCompile Include="PeasantObjectManager.cpp" />
+    <ClCompile Include="PeasantHolder.cpp" />
+    <ClCompile Include="PeasantObjectFactory.cpp" />
+    <ClCompile Include="PeasantObjectLoader.cpp" />
+    <ClCompile Include="PeasantObjectDeleter.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Peasant.h" />
+    <ClInclude Include="PeasantSystem.h" />
+    <ClInclude Include="PeasantConfig.h" />
+    <ClInclude Include="PeasantObject.h" />
+    <ClInclude Include="PeasantStorage.h" />
+    <ClInclude Include="PeasantInstance.h" />
+    <ClInclude Include="PeasantObjectManager.h" />
+    <ClInclude Include="PeasantMultipleQueue.h" />
+    <ClInclude Include="PeasantHolder.h" />
+    <ClInclude Include="PeasantObjectFactory.h" />
+    <ClInclude Include="PeasantObjectLoader.h" />
+    <ClInclude Include="PeasantObjectDeleter.h" />
+  </ItemGroup>
+</Project>

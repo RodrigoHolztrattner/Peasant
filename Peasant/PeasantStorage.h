@@ -1,0 +1,84 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: PeasantStorage.h
+////////////////////////////////////////////////////////////////////////////////
+#pragma once
+
+//////////////
+// INCLUDES //
+//////////////
+#include "PeasantConfig.h"
+
+#include <cstdint>
+#include <vector>
+#include <atomic>
+#include <map>
+
+///////////////
+// NAMESPACE //
+///////////////
+
+/////////////
+// DEFINES //
+/////////////
+
+////////////
+// GLOBAL //
+////////////
+
+///////////////
+// NAMESPACE //
+///////////////
+
+// Peasant
+PeasantDevelopmentNamespaceBegin(Peasant)
+
+//////////////
+// TYPEDEFS //
+//////////////
+
+////////////////
+// FORWARDING //
+////////////////
+
+// Classes we know
+class PeasantObject;
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: PeasantStorage
+////////////////////////////////////////////////////////////////////////////////
+class PeasantStorage
+{
+public:
+
+//////////////////
+// CONSTRUCTORS //
+public: //////////
+
+	// Constructor / destructor
+	PeasantStorage();
+	~PeasantStorage();
+
+//////////////////
+// MAIN METHODS //
+public: //////////
+
+	// Try to find an object with the input hash, if sucessfull, return it
+	PeasantObject* FindObject(PeasantHash _hash);
+
+	// Insert a new object
+	bool InsertObject(PeasantObject* _object, PeasantHash _hash);
+
+	// Remove a object
+	bool RemoveObject(PeasantObject* _object);
+	bool RemoveObject(PeasantHash _hash);
+
+///////////////
+// VARIABLES //
+private: //////
+
+	// The object map
+	std::map<PeasantHash, PeasantObject*> m_ObjectMap;
+};
+
+// Peasant
+PeasantDevelopmentNamespaceEnd(Peasant)

@@ -7,10 +7,9 @@
 // Using namespace Peasant
 PeasantUsingDevelopmentNamespace(Peasant)
 
-PeasantObjectManager::PeasantObjectManager(PeasantStorage& _storageReference, uint32_t _workerThreads, ThreadIndexRetrieveMethod _threadIndexMethod, ObjectLoadMethod _objectLoadMethod, ObjectDeleteMethod _objectDeletionMethod) : 
+PeasantObjectManager::PeasantObjectManager(PeasantStorage& _storageReference, uint32_t _workerThreads, ThreadIndexRetrieveMethod _threadIndexMethod, ObjectLoadMethod _objectLoadMethod) : 
 	m_StorageReference(_storageReference),
-	m_ObjectLoader(_objectLoadMethod),
-	m_ObjectDeleter(_objectDeletionMethod)
+	m_ObjectLoader(_objectLoadMethod)
 {
 	// If we have at last one worker thread
 	if (_workerThreads > 1)
@@ -36,9 +35,13 @@ bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash
 	return true;
 }
 
-void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance)
+void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr)
 {
-	m_InstanceReleases.Insert(_instance);
+	// Create the new release request
+	ObjectRelease release = { _instance, _factoryPtr };
+
+	// Push the new release request
+	m_InstanceReleases.Insert(release);
 }
 
 void PeasantObjectManager::Update()
@@ -96,13 +99,13 @@ void PeasantObjectManager::Update()
 	}, true);
 
 	// For each release, run the process method
-	m_InstanceReleases.ProcessAll([&](PeasantInstance* _instance)
+	m_InstanceReleases.ProcessAll([&](ObjectRelease _releaseRequest)
 	{
 		// Get the internal object ptr
-		PeasantObject* objectPtr = _instance->GetObjectPtr();
+		PeasantObject* objectPtr = _releaseRequest.instance->GetObjectPtr();
 
 		// Release this instance
-		objectPtr->ReleaseInstance(_instance);
+		objectPtr->ReleaseInstance(_releaseRequest.instance);
 
 		// Check if the object should be deleted
 		if (!objectPtr->IsReferenced())
@@ -111,7 +114,7 @@ void PeasantObjectManager::Update()
 			m_StorageReference.RemoveObject(objectPtr);
 
 			// Add this object into the deletion queue
-			m_ObjectDeleter.DeleteObject(objectPtr);
+			m_ObjectDeleter.DeleteObject(objectPtr, _releaseRequest.factoryPtr);
 		}
 
 	}, true);

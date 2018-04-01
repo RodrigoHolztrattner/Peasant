@@ -9,6 +9,7 @@
 #include "PeasantConfig.h"
 #include "PeasantObject.h"
 #include "PeasantStorage.h"
+#include "PeasantObjectFactory.h"
 
 #include "ThirdParty\readerwriterqueue\readerwriterqueue.h"
 #include <thread>
@@ -36,9 +37,6 @@ PeasantDevelopmentNamespaceBegin(Peasant)
 // TYPEDEFS //
 //////////////
 
-// Delete method type
-typedef std::function<bool(PeasantObject* _object)> ObjectDeleteMethod;
-
 ////////////////
 // FORWARDING //
 ////////////////
@@ -50,12 +48,20 @@ class PeasantObjectDeleter
 {
 public:
 
+	// The delete request type
+	struct DeleteRequest
+	{
+		// The object and factory
+		PeasantObject* object;
+		PeasantObjectFactory* factory;
+	};
+
 //////////////////
 // CONSTRUCTORS //
 public: //////////
 
 	// Constructor / destructor
-	PeasantObjectDeleter(ObjectDeleteMethod _objectDeleteMethod);
+	PeasantObjectDeleter();
 	~PeasantObjectDeleter();
 
 //////////////////
@@ -63,7 +69,7 @@ public: //////////
 public: //////////
 
 	// Load a new object
-	bool DeleteObject(PeasantObject* _object);
+	bool DeleteObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr);
 
 private:
 
@@ -78,10 +84,7 @@ private: //////
 	std::thread m_AuxiliarThread;
 
 	// The object queue
-	moodycamel::ReaderWriterQueue<PeasantObject*> m_Queue;
-
-	// The delete method
-	ObjectDeleteMethod m_DeleteMethod;
+	moodycamel::ReaderWriterQueue<DeleteRequest> m_Queue;
 };
 
 // Peasant

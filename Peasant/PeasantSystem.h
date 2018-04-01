@@ -47,8 +47,7 @@ PeasantDevelopmentNamespaceBegin(Peasant)
 // The config data
 struct PeasantConfigData
 {
-	// The object load and delete methods
-	ObjectDeleteMethod												objectDeletionMethod;
+	// The object load method
 	ObjectLoadMethod												objectLoadMethod;
 
 	// The total number of worker threads
@@ -81,7 +80,7 @@ public: //////////
 	bool RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr);
 
 	// Release an object instance
-	void ReleaseObject(PeasantInstance& _instance);
+	void ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr);
 
 	// The update method, process all requests
 	void Update();

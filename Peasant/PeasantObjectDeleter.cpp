@@ -8,11 +8,8 @@
 // Using namespace Peasant
 PeasantUsingDevelopmentNamespace(Peasant)
 
-PeasantObjectDeleter::PeasantObjectDeleter(ObjectDeleteMethod _objectDeleteMethod)
+PeasantObjectDeleter::PeasantObjectDeleter()
 {
-	// Set the initial data
-	m_DeleteMethod = _objectDeleteMethod;
-
 	// Create the auxiliar thread
 	m_AuxiliarThread = std::thread(&PeasantObjectDeleter::DeleteObjectAuxiliar, this);
 }
@@ -21,9 +18,12 @@ PeasantObjectDeleter::~PeasantObjectDeleter()
 {
 }
 
-bool PeasantObjectDeleter::DeleteObject(PeasantObject* _object)
+bool PeasantObjectDeleter::DeleteObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr)
 {
-	return m_Queue.enqueue(_object);
+	// Create the delete request
+	DeleteRequest deleteRequest = { _object, _factoryPtr };
+
+	return m_Queue.enqueue(deleteRequest);
 }
 
 void PeasantObjectDeleter::DeleteObjectAuxiliar()
@@ -32,8 +32,8 @@ void PeasantObjectDeleter::DeleteObjectAuxiliar()
 	while (true)
 	{
 		// Try to get an object from the queue
-		PeasantObject* object;
-		if (!m_Queue.try_dequeue(object))
+		DeleteRequest deleteRequest;
+		if (!m_Queue.try_dequeue(deleteRequest))
 		{
 			// Sleep because there is no object to dequeue
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -41,8 +41,12 @@ void PeasantObjectDeleter::DeleteObjectAuxiliar()
 			continue;
 		}
 
-		// Delete this object
-		bool result = m_DeleteMethod(object);
+		// Call the OnDelete() method for this object (to release the data)
+		bool result = deleteRequest.object->BeginDelete();
+
+		// Call the release method for the factory
+		deleteRequest.factory->ReleaseObject(deleteRequest.object); // TODO remove from here and make this sync with the manager
+
 		assert(result == true);
 	}
 }

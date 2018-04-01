@@ -63,12 +63,22 @@ public:
 		PeasantObjectFactory* factoryPtr;
 	};
 
+	// The release type
+	struct ObjectRelease
+	{
+		// The instance
+		PeasantInstance* instance;
+
+		// The factory ptr
+		PeasantObjectFactory* factoryPtr;
+	};
+
 //////////////////
 // CONSTRUCTORS //
 public: //////////
 
 	// Constructor / destructor
-	PeasantObjectManager(PeasantStorage& _storageReference, uint32_t _workerThreads, ThreadIndexRetrieveMethod _threadIndexMethod, ObjectLoadMethod _objectLoadMethod, ObjectDeleteMethod _objectDeletionMethod);
+	PeasantObjectManager(PeasantStorage& _storageReference, uint32_t _workerThreads, ThreadIndexRetrieveMethod _threadIndexMethod, ObjectLoadMethod _objectLoadMethod);
 	~PeasantObjectManager();
 	
 //////////////////
@@ -79,7 +89,7 @@ public: //////////
 	bool RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr);
 
 	// Release an object instance
-	void ReleaseObject(PeasantInstance* _instance);
+	void ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr);
 
 	// The update method, process all requests
 	void Update();
@@ -94,7 +104,7 @@ private: //////
 
 	// The object requests and the release queue
 	MultipleQueue<ObjectRequest> m_ObjectRequests;
-	MultipleQueue<PeasantInstance*> m_InstanceReleases;
+	MultipleQueue<ObjectRelease> m_InstanceReleases;
 
 	// The construct queue
 	std::vector<PeasantInstance*> m_ConstructQueue;

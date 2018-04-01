@@ -37,7 +37,7 @@ PeasantDevelopmentNamespaceBegin(Peasant)
 //////////////
 
 // Load method type
-typedef std::function<bool(PeasantObject* _object, PeasantHash _hash)> ObjectLoadMethod;
+typedef std::function<bool(unsigned char* _dataPtr, uint32_t& _dataSizeRef, PeasantHash _hash)> ObjectLoadMethod;
 
 ////////////////
 // FORWARDING //

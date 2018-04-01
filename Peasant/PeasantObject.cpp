@@ -13,12 +13,68 @@ PeasantObject::PeasantObject()
 {
 	// Set the initial data
 	m_IsLoaded = true;
+	m_DataValid = false;
 	m_TotalReferences = 0;
+	m_Data = nullptr;
+	m_DataSize = 0;
 }
 
 PeasantObject::~PeasantObject()
 {
 	assert(m_TotalReferences == 0);
+}
+
+bool PeasantObject::BeginLoad()
+{
+	// Check if the data is valid
+	if (m_Data == nullptr || m_DataSize == 0)
+	{
+		return false;
+	}
+
+	// Call the Onload() method
+	if (!OnLoad(m_Data, m_DataSize))
+	{
+		return false;
+	}
+
+	// Set data valid and loaded
+	m_DataValid = true;
+	m_IsLoaded = true;
+
+	return true;
+}
+
+bool PeasantObject::BeginDelete()
+{
+	// Check if we have some data to delete
+	if (m_Data == nullptr || m_DataSize == 0)
+	{
+		return false;
+	}
+
+	// Set unloaded
+	m_IsLoaded = false;
+
+	// Call the OnDelete() method
+	if (!OnDelete(m_Data))
+	{
+		return false;
+	}
+
+	// Check if the data was deleted
+	if (m_Data != nullptr)
+	{
+		return false;
+	}
+
+	// Set the data size
+	m_DataSize = 0;
+
+	// Set data invalid
+	m_DataValid = false;
+
+	return true;
 }
 
 bool PeasantObject::WasLoaded()
@@ -29,6 +85,11 @@ bool PeasantObject::WasLoaded()
 bool PeasantObject::IsReferenced()
 {
 	return m_TotalReferences > 0;
+}
+
+bool PeasantObject::IsDataValid()
+{
+	return m_DataValid;
 }
 
 PeasantHash PeasantObject::GetHash()
@@ -56,4 +117,19 @@ void PeasantObject::ReleaseInstance(PeasantInstance* _instance)
 
 	// Subtract one from the reference count
 	m_TotalReferences--;
+}
+
+uint32_t PeasantObject::GetDataSize()
+{
+	return m_DataSize;
+}
+
+uint32_t& PeasantObject::GetDataSizeRef()
+{
+	return m_DataSize;
+}
+
+unsigned char* PeasantObject::GetDataPtr()
+{
+	return m_Data;
 }

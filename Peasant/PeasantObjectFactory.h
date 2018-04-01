@@ -64,6 +64,9 @@ public: //////////
 	// Request a new object
 	virtual PeasantObject* RequestObject() = 0;
 
+	// Release an object // TODO make this method callable only for the manager (sync, not async (the way it currently works right now))
+	virtual void ReleaseObject(PeasantObject* _object) = 0;
+
 ///////////////
 // VARIABLES //
 private: //////

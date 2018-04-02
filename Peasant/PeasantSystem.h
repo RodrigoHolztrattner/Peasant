@@ -77,10 +77,10 @@ public: //////////
 public: //////////
 
 	// Request an object for the given instance and resource hash
-	bool RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr);
+	bool RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct = false);
 
 	// Release an object instance
-	void ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr);
+	void ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion = false);
 
 	// The update method, process all requests
 	void Update();

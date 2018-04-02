@@ -42,6 +42,8 @@ bool PeasantStorage::InsertObject(PeasantObject* _object, PeasantHash _hash)
 
 	// Insert the object
 	m_ObjectMap.insert(std::pair<PeasantHash, PeasantObject*>(_hash, _object));
+
+	return true;
 }
 
 bool PeasantStorage::RemoveObject(PeasantObject* _object)

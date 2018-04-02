@@ -54,6 +54,17 @@ public:
 		// The object and factory
 		PeasantObject* object;
 		PeasantObjectFactory* factory;
+
+		// If this object should be deleted synchronous
+		bool deleteSync;
+	};
+
+	// The factory delete request
+	struct FactoryDeleteRequest
+	{
+		// The object and factory
+		PeasantObject* object;
+		PeasantObjectFactory* factory;
 	};
 
 //////////////////
@@ -69,7 +80,10 @@ public: //////////
 public: //////////
 
 	// Load a new object
-	bool DeleteObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr);
+	bool DeleteObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr, bool _deleteSync);
+
+	// The update method
+	void Update();
 
 private:
 
@@ -85,6 +99,9 @@ private: //////
 
 	// The object queue
 	moodycamel::ReaderWriterQueue<DeleteRequest> m_Queue;
+
+	// The factory deletion queue (used to delete the object itself by the factory in sync mode)
+	moodycamel::ReaderWriterQueue<FactoryDeleteRequest> m_FactoryDeletionQueue;
 };
 
 // Peasant

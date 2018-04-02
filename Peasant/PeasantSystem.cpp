@@ -17,14 +17,14 @@ PeasantSystem::~PeasantSystem()
 {
 }
 
-bool PeasantSystem::RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr)
+bool PeasantSystem::RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
-	return m_ObjectManager.RequestObject(&_instance, _hash, _factoryPtr);
+	return m_ObjectManager.RequestObject(&_instance, _hash, _factoryPtr, _allowAsynchronousConstruct);
 }
 
-void PeasantSystem::ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr)
+void PeasantSystem::ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
 {
-	m_ObjectManager.ReleaseObject(&_instance, _factoryPtr);
+	m_ObjectManager.ReleaseObject(&_instance, _factoryPtr, _allowAsynchronousDeletion);
 }
 
 void PeasantSystem::Update()

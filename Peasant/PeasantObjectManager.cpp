@@ -24,21 +24,34 @@ PeasantObjectManager::~PeasantObjectManager()
 {
 }
 
-bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr)
+bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
-	// Create the new request
-	ObjectRequest request = { _instance, _hash, _factoryPtr };
+	// Check if we already have an object with this hash, if the ibject was loaded and if we can construct this instance asynchronous
+	PeasantObject* object = m_StorageReference.FindObject(_hash);
+	if (object != nullptr && object->WasLoaded() && _allowAsynchronousConstruct)
+	{
+		// Make the instance reference it
+		object->MakeInstanceReference(_instance);
 
-	// Push the new request
-	m_ObjectRequests.Insert(request);
+		// Construct this instance
+		_instance->BeginConstruction();
+	}
+	else
+	{
+		// Create the new request
+		ObjectRequest request = { _instance, _hash, _factoryPtr };
+
+		// Push the new request
+		m_ObjectRequests.Insert(request);
+	}
 
 	return true;
 }
 
-void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr)
+void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
 {
 	// Create the new release request
-	ObjectRelease release = { _instance, _factoryPtr };
+	ObjectRelease release = { _instance, _factoryPtr, !_allowAsynchronousDeletion };
 
 	// Push the new release request
 	m_InstanceReleases.Insert(release);
@@ -47,27 +60,7 @@ void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObje
 void PeasantObjectManager::Update()
 {
 	// Prevent multiple threads from running this code (only one thread allowed, take care!)
-	// std::lock_guard<std::mutex> guard(m_Mutex);
-
-	// Process all construct objects
-	for (unsigned int i = 0; i < m_ConstructQueue.size(); i++)
-	{
-		// Get the instance
-		PeasantInstance* instance = m_ConstructQueue[i];
-
-		// Check if the internal object was loaded and this instance is ready to be constructed
-		if (instance->WasLoaded())
-		{
-			// Construct this instance
-			instance->BeginConstruction();
-
-			// Remove it from the construct queue
-			m_ConstructQueue.erase(m_ConstructQueue.begin() + 1);
-
-			// Return 1 from the current index
-			i--;
-		}
-	}
+	std::lock_guard<std::mutex> guard(m_Mutex);
 
 	// For each request, run the process method
 	m_ObjectRequests.ProcessAll([&](ObjectRequest& _requestData)
@@ -83,14 +76,11 @@ void PeasantObjectManager::Update()
 			// Set the object hash
 			object->SetHash(_requestData.hash);
 
-			// Add the instance to the object alert callback
-			// ... TODO
-
 			// Insert this file into the load queue
 			m_ObjectLoader.LoadObject(object, _requestData.hash);
 		}
 
-		// Mae the instance reference it
+		// Make the instance reference it
 		object->MakeInstanceReference(_requestData.instance);
 
 		// Insert the reference into the construct queue
@@ -114,8 +104,31 @@ void PeasantObjectManager::Update()
 			m_StorageReference.RemoveObject(objectPtr);
 
 			// Add this object into the deletion queue
-			m_ObjectDeleter.DeleteObject(objectPtr, _releaseRequest.factoryPtr);
+			m_ObjectDeleter.DeleteObject(objectPtr, _releaseRequest.factoryPtr, _releaseRequest.deleteSync);
 		}
 
 	}, true);
+
+	// Process all construct objects
+	for (unsigned int i = 0; i < m_ConstructQueue.size(); i++)
+	{
+		// Get the instance
+		PeasantInstance* instance = m_ConstructQueue[i];
+
+		// Check if the internal object was loaded and this instance is ready to be constructed
+		if (instance->WasLoaded())
+		{
+			// Construct this instance
+			instance->BeginConstruction();
+
+			// Remove it from the construct queue
+			m_ConstructQueue.erase(m_ConstructQueue.begin() + 1);
+
+			// Return 1 from the current index
+			i--;
+		}
+	}
+
+	// Call the update method for the object deleter
+	m_ObjectDeleter.Update();
 }

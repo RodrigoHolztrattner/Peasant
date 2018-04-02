@@ -29,6 +29,17 @@ bool PeasantObjectLoader::LoadObject(PeasantObject* _object, PeasantHash _hash)
 	return m_Queue.enqueue(loadData);
 }
 
+void PeasantObjectLoader::Update()
+{
+	// For each object inside our synchronization queue
+	PeasantObject* object = nullptr;
+	while (m_SynchronizationQueue.try_dequeue(object))
+	{
+		// Call the BeginSynchronization() method
+		object->BeginSynchronization();
+	}
+}
+
 void PeasantObjectLoader::LoadObjectAuxiliar()
 {
 	// Do forever
@@ -53,5 +64,8 @@ void PeasantObjectLoader::LoadObjectAuxiliar()
 		result = loadData.object->BeginLoad();
 
 		assert(result == true);
+		
+		// Insert the object into the synchronization queue
+		m_SynchronizationQueue.enqueue(loadData.object);
 	}
 }

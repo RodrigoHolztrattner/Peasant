@@ -51,6 +51,11 @@ bool PeasantInstance::WasLoaded()
 	return m_ReferenceObject->WasLoaded();
 }
 
+bool PeasantInstance::WasSynchronized()
+{
+	return m_ReferenceObject->WasSynchronized();
+}
+
 bool PeasantInstance::IsLocked()
 {
 	return m_IsLocked;
@@ -62,6 +67,7 @@ void PeasantInstance::Unlock()
 	assert(m_DependencyCount == 0);
 	assert(m_ReferenceObject != nullptr);
 	assert(m_ReferenceObject->WasLoaded());
+	assert(m_ReferenceObject->WasSynchronized());
 
 	m_IsLocked = false;
 }

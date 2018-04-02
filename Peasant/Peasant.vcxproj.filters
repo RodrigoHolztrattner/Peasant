@@ -26,4 +26,7 @@
     <ClInclude Include="PeasantObjectLoader.h" />
     <ClInclude Include="PeasantObjectDeleter.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
 </Project>

@@ -115,8 +115,8 @@ void PeasantObjectManager::Update()
 		// Get the instance
 		PeasantInstance* instance = m_ConstructQueue[i];
 
-		// Check if the internal object was loaded and this instance is ready to be constructed
-		if (instance->WasLoaded())
+		// Check if the internal object was loaded (and synchronized) and this instance is ready to be constructed
+		if (instance->WasLoaded() && instance->WasSynchronized())
 		{
 			// Construct this instance
 			instance->BeginConstruction();
@@ -129,6 +129,7 @@ void PeasantObjectManager::Update()
 		}
 	}
 
-	// Call the update method for the object deleter
+	// Call the update method for the object deleter and loader
 	m_ObjectDeleter.Update();
+	m_ObjectLoader.Update();
 }

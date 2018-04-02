@@ -69,10 +69,13 @@ public: //////////
 // VIRTUAL METHODS //
 protected: //////////
 
-	// The OnLoad method
+	// The OnLoad method (asynchronous method)
 	virtual bool OnLoad(unsigned char* _data, uint32_t _dataSize) = 0;
 
-	// The OnDelete() method
+	// The OnSynchronization method (synchronous method)
+	virtual bool OnSynchronization() = 0;
+
+	// The OnDelete() method (asynchronous method)
 	virtual bool OnDelete(unsigned char* _data) = 0;
 
 //////////////////
@@ -88,14 +91,18 @@ public: //////////
 	// Return if the data is valid
 	bool IsDataValid();
 
+	// Return if this object was synchronized
+	bool WasSynchronized();
+
 	// Return the object hash
 	PeasantHash GetHash();
 
 protected:
 
-	// Begin load and deletion methods
+	// Begin load, deletion and synchronize methods
 	bool BeginLoad();
 	bool BeginDelete();
+	bool BeginSynchronization();
 
 	// Set the hash
 	void SetHash(PeasantHash _hash);
@@ -115,9 +122,10 @@ protected:
 // VARIABLES //
 private: //////
 
-	// If this object was loaded and if the data is valid
+	// If this object was loaded, if the data is valid and if this object was synchronized
 	bool m_IsLoaded;
 	bool m_DataValid;
+	bool m_WasSynchronized;
 
 	// The total number of references
 	std::atomic<uint32_t> m_TotalReferences;

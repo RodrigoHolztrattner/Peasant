@@ -77,6 +77,9 @@ public: //////////
 	// Return if this internal object was loaded
 	bool WasLoaded();
 
+	// Return if the internal object was synchronized
+	bool WasSynchronized();
+
 	// Return if all dependencies are fulfilled
 	bool AreDependenciesFulfilled();
 

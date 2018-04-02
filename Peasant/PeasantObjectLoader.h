@@ -73,6 +73,9 @@ public: //////////
 	// Load a new object
 	bool LoadObject(PeasantObject* _object, PeasantHash _hash);
 
+	// The update method
+	void Update();
+
 private:
 
 	// The auxiliar load method
@@ -87,6 +90,9 @@ private: //////
 
 	// The object queue
 	moodycamel::ReaderWriterQueue<LoadData> m_Queue;
+
+	// The object synchronization queue (callable only if the object was loaded)
+	moodycamel::ReaderWriterQueue<PeasantObject*> m_SynchronizationQueue;
 
 	// The load method
 	ObjectLoadMethod m_LoadMethod;

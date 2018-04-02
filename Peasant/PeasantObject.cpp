@@ -14,6 +14,7 @@ PeasantObject::PeasantObject()
 	// Set the initial data
 	m_IsLoaded = true;
 	m_DataValid = false;
+	m_WasSynchronized = false;
 	m_TotalReferences = 0;
 	m_Data = nullptr;
 	m_DataSize = 0;
@@ -71,8 +72,24 @@ bool PeasantObject::BeginDelete()
 	// Set the data size
 	m_DataSize = 0;
 
+	// Unsynchronize this object
+	m_WasSynchronized = false;
+
 	// Set data invalid
 	m_DataValid = false;
+
+	return true;
+}
+
+bool PeasantObject::BeginSynchronization()
+{
+	assert(!m_WasSynchronized);
+
+	// Call the OnSynchronization() method
+	OnSynchronization();
+
+	// Set synchronized
+	m_WasSynchronized = true;
 
 	return true;
 }
@@ -90,6 +107,11 @@ bool PeasantObject::IsReferenced()
 bool PeasantObject::IsDataValid()
 {
 	return m_DataValid;
+}
+
+bool PeasantObject::WasSynchronized()
+{
+	return m_WasSynchronized;
 }
 
 PeasantHash PeasantObject::GetHash()

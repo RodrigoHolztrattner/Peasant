@@ -7,8 +7,11 @@
 // INCLUDES //
 //////////////
 #include "PeasantConfig.h"
-#include "PeasantSystem.h"
 #include "PeasantObject.h"
+#include "PeasantInstance.h"
+#include "PeasantObjectFactory.h"
+#include "PeasantStorage.h"
+#include "PeasantSystem.h"
 
 ///////////////
 // NAMESPACE //

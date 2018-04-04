@@ -122,7 +122,7 @@ void PeasantObjectManager::Update()
 			instance->BeginConstruction();
 
 			// Remove it from the construct queue
-			m_ConstructQueue.erase(m_ConstructQueue.begin() + 1);
+			m_ConstructQueue.erase(m_ConstructQueue.begin() + i);
 
 			// Return 1 from the current index
 			i--;

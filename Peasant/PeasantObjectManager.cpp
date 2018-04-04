@@ -28,7 +28,7 @@ bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash
 {
 	// Check if we already have an object with this hash, if the ibject was loaded and if we can construct this instance asynchronous
 	PeasantObject* object = m_StorageReference.FindObject(_hash);
-	if (object != nullptr && object->WasLoaded() && _allowAsynchronousConstruct)
+	if (object != nullptr && object->WasLoaded() && object->WasSynchronized() && _allowAsynchronousConstruct)
 	{
 		// Make the instance reference it
 		object->MakeInstanceReference(_instance);

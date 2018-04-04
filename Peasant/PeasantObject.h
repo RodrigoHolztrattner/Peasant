@@ -116,7 +116,7 @@ protected:
 	// Return the data size and ptr
 	uint32_t GetDataSize();
 	uint32_t& GetDataSizeRef();
-	unsigned char* GetDataPtr();
+	unsigned char** GetDataPtrRef();
 
 ///////////////
 // VARIABLES //

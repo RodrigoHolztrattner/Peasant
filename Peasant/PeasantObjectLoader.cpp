@@ -56,7 +56,7 @@ void PeasantObjectLoader::LoadObjectAuxiliar()
 		}
 
 		// Load this object
-		bool result = m_LoadMethod(loadData.object->GetDataPtr(), loadData.object->GetDataSizeRef(), loadData.hash);
+		bool result = m_LoadMethod(loadData.object->GetDataPtrRef(), loadData.object->GetDataSizeRef(), loadData.hash);
 
 		assert(result == true);
 

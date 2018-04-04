@@ -151,7 +151,7 @@ uint32_t& PeasantObject::GetDataSizeRef()
 	return m_DataSize;
 }
 
-unsigned char* PeasantObject::GetDataPtr()
+unsigned char** PeasantObject::GetDataPtrRef()
 {
-	return m_Data;
+	return &m_Data;
 }

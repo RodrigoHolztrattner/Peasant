@@ -111,7 +111,7 @@ private: //////
 	// The object requests and the release queue
 	MultipleQueue<ObjectRequest> m_ObjectRequests;
 	MultipleQueue<ObjectRelease> m_InstanceReleases;
-
+	
 	// The construct queue
 	std::vector<PeasantInstance*> m_ConstructQueue;
 

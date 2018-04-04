@@ -44,6 +44,7 @@ class PeasantInstance;
 class PeasantObjectManager;
 class PeasantObjectLoader;
 class PeasantObjectDeleter;
+class PeasantObjectFactory;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: PeasantObject
@@ -97,6 +98,13 @@ public: //////////
 	// Return the object hash
 	PeasantHash GetHash();
 
+	// Return the object factory casting to the given template typeclass
+	template<typename FactoryClass>
+	FactoryClass* GetFactoryPtr()
+	{
+		return static_cast<FactoryClass*>(m_Factory);
+	}
+
 protected:
 
 	// Begin load, deletion and synchronize methods
@@ -106,6 +114,9 @@ protected:
 
 	// Set the hash
 	void SetHash(PeasantHash _hash);
+
+	// Set the factory reference
+	void SetFactoryReference(PeasantObjectFactory* _factoryReference);
 
 	// Make a instance reference this object
 	void MakeInstanceReference(PeasantInstance* _instance);
@@ -138,6 +149,9 @@ private: //////
 
 	// The object data size
 	uint32_t m_DataSize;
+
+	// The object factory
+	PeasantObjectFactory* m_Factory;
 };
 
 // Peasant

@@ -43,6 +43,7 @@ PeasantDevelopmentNamespaceBegin(Peasant)
 // Classes we know
 class PeasantObjectManager;
 class PeasantObject;
+class PeasantObjectFactory;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Class name: PeasantInstance
@@ -85,6 +86,13 @@ public: //////////
 
 	// Return the object ptr
 	PeasantObject* GetObjectPtr();
+
+	// Return the object factory casting to the given template typeclass
+	template<typename FactoryClass>
+	FactoryClass* GetFactoryPtr()
+	{
+		return m_ReferenceObject->GetFactoryPtr<FactoryClass>();
+	}
 
 protected:
 

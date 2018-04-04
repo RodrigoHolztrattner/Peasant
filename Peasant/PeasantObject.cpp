@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "PeasantObject.h"
 #include "PeasantInstance.h"
+#include "PeasantObjectFactory.h"
 
 #include <cassert>
 
@@ -122,6 +123,11 @@ PeasantHash PeasantObject::GetHash()
 void PeasantObject::SetHash(PeasantHash _hash)
 {
 	m_Hash = _hash;
+}
+
+void PeasantObject::SetFactoryReference(PeasantObjectFactory* _factoryReference)
+{
+	m_Factory = _factoryReference;
 }
 
 void PeasantObject::MakeInstanceReference(PeasantInstance* _instance)

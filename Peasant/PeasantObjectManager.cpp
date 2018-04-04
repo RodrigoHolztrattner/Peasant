@@ -76,6 +76,9 @@ void PeasantObjectManager::Update()
 			// Set the object hash
 			object->SetHash(_requestData.hash);
 
+			// Set the object factory reference
+			object->SetFactoryReference(_requestData.factoryPtr);
+
 			// Insert this file into the load queue
 			m_ObjectLoader.LoadObject(object, _requestData.hash);
 		}

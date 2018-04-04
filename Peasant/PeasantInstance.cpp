@@ -2,6 +2,7 @@
 // Filename: PeasantInstance.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "PeasantInstance.h"
+#include "PeasantObjectFactory.h"
 
 #include <cassert>
 

@@ -102,7 +102,7 @@ public: //////////
 	template<typename FactoryClass>
 	FactoryClass* GetFactoryPtr()
 	{
-		return static_cast<FactoryClass*>(m_Factory);
+		return reinterpret_cast<FactoryClass*>(m_Factory);
 	}
 
 protected:

@@ -7,6 +7,7 @@
 // INCLUDES //
 //////////////
 #include <cstdint>
+#include <string>
 
 /////////////
 // DEFINES //
@@ -72,7 +73,53 @@ private:
 template <typename ObjectType>
 ObjectType* GlobalInstance<ObjectType>::m_InternalObject = nullptr;
 
+// Hash the given str (static)
+static constexpr uint64_t HashString(const char* _str)
+{
+	return *_str ?
+		static_cast<uint64_t>(*_str) + 33 * HashString(_str + 1) :
+		5381;
+}
+
+// Hash the given str (non static)
+static uint64_t HashString(char* _str)
+{
+	return *_str ?
+		static_cast<uint64_t>(*_str) + 33 * HashString(_str + 1) :
+		5381;
+}
+
 // The peasant hash key type
-typedef uint64_t PeasantHash;
+struct PeasantHash
+{
+	// Default constructor
+	PeasantHash()
+	{
+		// Set the initial data
+		hash = flags = 0;
+	}
+
+	// Construct with input
+	PeasantHash(const char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
+	PeasantHash(char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
+	PeasantHash(const std::string _str, uint64_t _flags = 0) : hash(HashString(_str.c_str())), flags(_flags) {}
+
+	// Compare operator
+	bool operator<(const PeasantHash& _other) const
+	{
+		// If both hashes are equal, compare the flags
+		if (hash == _other.hash)
+		{
+			return flags < _other.flags;
+		}
+		return hash < _other. hash;
+	}
+
+	// The hash value
+	uint64_t hash;
+
+	// The flag value
+	uint64_t flags;
+};
 
 PeasantDevelopmentNamespaceEnd(Peasant)

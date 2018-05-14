@@ -79,6 +79,10 @@ public: //////////
 	// Request an object for the given instance and resource hash
 	bool RequestObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct = false);
 
+	// Request a permanent object for the given instance and resource hash, the object will not be deleted when it reaches 0
+	// references, the deletion phase will only occur in conjunction with the storage deletion
+	bool RequestPersistentObject(PeasantInstance& _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct = false);
+
 	// Release an object instance
 	void ReleaseObject(PeasantInstance& _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion = false);
 

@@ -53,9 +53,10 @@ public:
 	// The load data
 	struct LoadData
 	{
-		// The object and the hash
+		// The object, the hash and if it is permanent
 		PeasantObject* object;
 		PeasantHash hash;
+		bool isPermanent;
 	};
 
 //////////////////
@@ -71,7 +72,7 @@ public: //////////
 public: //////////
 
 	// Load a new object
-	bool LoadObject(PeasantObject* _object, PeasantHash _hash);
+	bool LoadObject(PeasantObject* _object, PeasantHash _hash, bool _isPermanent);
 
 	// The update method
 	void Update();

@@ -43,6 +43,9 @@ typedef PeasantDevelopmentNamespace(Peasant)::PeasantSystem				System;
 typedef PeasantDevelopmentNamespace(Peasant)::PeasantConfigData			ConfigData;
 typedef PeasantDevelopmentNamespace(Peasant)::PeasantHash				Hash;
 
+template <typename PeasantObjectType>
+using TemporaryInstance = PeasantDevelopmentNamespace(Peasant)::PeasantTemporaryInstance<PeasantObjectType>;
+
 ////////////////
 // FORWARDING //
 ////////////////

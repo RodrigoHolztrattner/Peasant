@@ -95,6 +95,9 @@ public: //////////
 	// Return if this object was synchronized
 	bool WasSynchronized();
 
+	// Return if this object is persistent (if it won't be released when it's reference count reaches 0)
+	bool IsPersistent();
+
 	// Return the object hash
 	PeasantHash GetHash();
 
@@ -105,10 +108,19 @@ public: //////////
 		return reinterpret_cast<FactoryClass*>(m_Factory);
 	}
 
+public:
+
+	// Make a instance reference this object
+	void MakeInstanceReference(PeasantInstance* _instance);
+	void MakeInstanceReference();
+
+	// Release a instance of this object
+	void ReleaseInstance();
+
 protected:
 
 	// Begin load, deletion and synchronize methods
-	bool BeginLoad();
+	bool BeginLoad(bool _isPersistent);
 	bool BeginDelete();
 	bool BeginSynchronization();
 
@@ -117,12 +129,6 @@ protected:
 
 	// Set the factory reference
 	void SetFactoryReference(PeasantObjectFactory* _factoryReference);
-
-	// Make a instance reference this object
-	void MakeInstanceReference(PeasantInstance* _instance);
-
-	// Release a instance of this object
-	void ReleaseInstance(PeasantInstance* _instance);
 
 	// Return the data size and ptr
 	uint32_t GetDataSize();
@@ -137,6 +143,7 @@ private: //////
 	bool m_IsLoaded;
 	bool m_DataValid;
 	bool m_WasSynchronized;
+	bool m_IsPersistent;
 
 	// The total number of references
 	std::atomic<uint32_t> m_TotalReferences;

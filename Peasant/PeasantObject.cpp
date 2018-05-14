@@ -16,6 +16,7 @@ PeasantObject::PeasantObject()
 	m_IsLoaded = true;
 	m_DataValid = false;
 	m_WasSynchronized = false;
+	m_IsPersistent = false;
 	m_TotalReferences = 0;
 	m_Data = nullptr;
 	m_DataSize = 0;
@@ -26,13 +27,16 @@ PeasantObject::~PeasantObject()
 	assert(m_TotalReferences == 0);
 }
 
-bool PeasantObject::BeginLoad()
+bool PeasantObject::BeginLoad(bool _isPersistent)
 {
 	// Check if the data is valid
 	if (m_Data == nullptr || m_DataSize == 0)
 	{
 		return false;
 	}
+
+	// Set if this object is persistent
+	m_IsPersistent = _isPersistent;
 
 	// Call the Onload() method
 	if (!OnLoad(m_Data, m_DataSize))
@@ -115,6 +119,11 @@ bool PeasantObject::WasSynchronized()
 	return m_WasSynchronized;
 }
 
+bool PeasantObject::IsPersistent()
+{
+	return m_IsPersistent;
+}
+
 PeasantHash PeasantObject::GetHash()
 {
 	return m_Hash;
@@ -139,7 +148,13 @@ void PeasantObject::MakeInstanceReference(PeasantInstance* _instance)
 	_instance->SetObjectReference(this);
 }
 
-void PeasantObject::ReleaseInstance(PeasantInstance* _instance)
+void PeasantObject::MakeInstanceReference()
+{
+	// Increment the total number of references
+	m_TotalReferences++;
+}
+
+void PeasantObject::ReleaseInstance()
 {
 	assert(m_TotalReferences > 0);
 

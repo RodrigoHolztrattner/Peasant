@@ -21,10 +21,10 @@ PeasantObjectLoader::~PeasantObjectLoader()
 {
 }
 
-bool PeasantObjectLoader::LoadObject(PeasantObject* _object, PeasantHash _hash)
+bool PeasantObjectLoader::LoadObject(PeasantObject* _object, PeasantHash _hash, bool _isPermanent)
 {
 	// Set the data
-	LoadData loadData = { _object, _hash };
+	LoadData loadData = { _object, _hash, _isPermanent };
 
 	return m_Queue.enqueue(loadData);
 }
@@ -61,7 +61,7 @@ void PeasantObjectLoader::LoadObjectAuxiliar()
 		assert(result == true);
 
 		// Call the BeginLoad() method for this object
-		result = loadData.object->BeginLoad();
+		result = loadData.object->BeginLoad(loadData.isPermanent);
 
 		assert(result == true);
 		

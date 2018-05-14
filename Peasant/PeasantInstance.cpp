@@ -5,8 +5,6 @@
 #include "PeasantObjectFactory.h"
 #include "PeasantObjectManager.h"
 
-#include <cassert>
-
 // Using namespace Peasant
 PeasantUsingDevelopmentNamespace(Peasant)
 

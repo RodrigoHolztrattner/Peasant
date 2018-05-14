@@ -2,6 +2,7 @@
 // Filename: PeasantObjectManager.cpp
 ////////////////////////////////////////////////////////////////////////////////
 #include "PeasantObjectManager.h"
+#include "PeasantInstance.h"
 #include <cassert>
 
 // Using namespace Peasant
@@ -18,6 +19,9 @@ PeasantObjectManager::PeasantObjectManager(PeasantStorage& _storageReference, ui
 		m_ObjectRequests.AllowThreadedAccess(_workerThreads, _threadIndexMethod);
 		m_InstanceReleases.AllowThreadedAccess(_workerThreads, _threadIndexMethod);
 	}
+
+	// Set the initial data
+	m_InUpdatePhase = false;
 }
 
 PeasantObjectManager::~PeasantObjectManager()
@@ -26,6 +30,9 @@ PeasantObjectManager::~PeasantObjectManager()
 
 bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
+	// Asserts
+	assert(!m_InUpdatePhase);
+
 	// Register the hash and this reference for this instance
 	_instance->RegisterInfo(_hash, this);
 
@@ -42,7 +49,40 @@ bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash
 	else
 	{
 		// Create the new request
-		ObjectRequest request = { _instance, _hash, _factoryPtr };
+		ObjectRequest request = { _instance, _hash, _factoryPtr, false };
+
+		// Push the new request
+		m_ObjectRequests.Insert(request);
+	}
+
+	return true;
+}
+
+bool PeasantObjectManager::RequestPersistentObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
+{
+	// Asserts
+	assert(!m_InUpdatePhase);
+
+	// Register the hash and this reference for this instance
+	_instance->RegisterInfo(_hash, this);
+
+	// Check if we already have an object with this hash, if the ibject was loaded and if we can construct this instance asynchronous
+	PeasantObject* object = m_StorageReference.FindObject(_hash);
+	if (object != nullptr && object->WasLoaded() && object->WasSynchronized() && _allowAsynchronousConstruct)
+	{
+		// Check if the object is permanent
+		assert(!object->IsPersistent() && "Trying to request a permanent object but it was already loaded and is not permanent!");
+
+		// Make the instance reference it
+		object->MakeInstanceReference(_instance);
+
+		// Construct this instance
+		_instance->BeginConstruction();
+	}
+	else
+	{
+		// Create the new request
+		ObjectRequest request = { _instance, _hash, _factoryPtr, true };
 
 		// Push the new request
 		m_ObjectRequests.Insert(request);
@@ -53,17 +93,35 @@ bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash
 
 void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
 {
+	// Asserts
+	assert(!m_InUpdatePhase);
+
 	// Create the new release request
-	ObjectRelease release = { _instance, _factoryPtr, !_allowAsynchronousDeletion };
+	ObjectRelease release = { _instance->GetObjectPtr(), _factoryPtr, !_allowAsynchronousDeletion };
 
 	// Push the new release request
 	m_InstanceReleases.Insert(release);
+}
+
+void PeasantObjectManager::ReleaseObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
+{
+	// Asserts
+	assert(!m_InUpdatePhase);
+
+	// Create the new temporary release request
+	TemporaryObjectRelease release = { _object, _factoryPtr, !_allowAsynchronousDeletion };
+
+	// Push the new release request
+	m_TemporaryInstanceReleases.Insert(release);
 }
 
 void PeasantObjectManager::Update()
 {
 	// Prevent multiple threads from running this code (only one thread allowed, take care!)
 	std::lock_guard<std::mutex> guard(m_Mutex);
+
+	// Begin the update phase
+	m_InUpdatePhase = true;
 
 	// For each request, run the process method
 	m_ObjectRequests.ProcessAll([&](ObjectRequest& _requestData)
@@ -83,7 +141,7 @@ void PeasantObjectManager::Update()
 			object->SetFactoryReference(_requestData.factoryPtr);
 
 			// Insert this file into the load queue
-			m_ObjectLoader.LoadObject(object, _requestData.hash);
+			m_ObjectLoader.LoadObject(object, _requestData.hash, _requestData.isPermanent);
 		}
 
 		// Make the instance reference it
@@ -97,20 +155,35 @@ void PeasantObjectManager::Update()
 	// For each release, run the process method
 	m_InstanceReleases.ProcessAll([&](ObjectRelease _releaseRequest)
 	{
-		// Get the internal object ptr
-		PeasantObject* objectPtr = _releaseRequest.instance->GetObjectPtr();
-
 		// Release this instance
-		objectPtr->ReleaseInstance(_releaseRequest.instance);
+		_releaseRequest.object->ReleaseInstance();
 
 		// Check if the object should be deleted
-		if (!objectPtr->IsReferenced())
+		if (!_releaseRequest.object->IsReferenced() && !_releaseRequest.object->IsPersistent())
 		{
 			// Remove this object from the storage
-			m_StorageReference.RemoveObject(objectPtr);
+			m_StorageReference.RemoveObject(_releaseRequest.object);
 
 			// Add this object into the deletion queue
-			m_ObjectDeleter.DeleteObject(objectPtr, _releaseRequest.factoryPtr, _releaseRequest.deleteSync);
+			m_ObjectDeleter.DeleteObject(_releaseRequest.object, _releaseRequest.factoryPtr, _releaseRequest.deleteSync);
+		}
+
+	}, true);
+
+	// For each temporary release, run the process method
+	m_TemporaryInstanceReleases.ProcessAll([&](TemporaryObjectRelease _releaseRequest)
+	{
+		// Release this instance
+		_releaseRequest.object->ReleaseInstance();
+
+		// Check if the object should be deleted
+		if (!_releaseRequest.object->IsReferenced() && !_releaseRequest.object->IsPersistent())
+		{
+			// Remove this object from the storage
+			m_StorageReference.RemoveObject(_releaseRequest.object);
+
+			// Add this object into the deletion queue
+			m_ObjectDeleter.DeleteObject(_releaseRequest.object, _releaseRequest.factoryPtr, _releaseRequest.deleteSync);
 		}
 
 	}, true);
@@ -138,4 +211,7 @@ void PeasantObjectManager::Update()
 	// Call the update method for the object deleter and loader
 	m_ObjectDeleter.Update();
 	m_ObjectLoader.Update();
+
+	// End the update phase
+	m_InUpdatePhase = false;
 }

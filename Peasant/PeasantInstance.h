@@ -65,12 +65,15 @@ public: //////////
 	PeasantInstance(const PeasantInstance& _other) = delete;
 	virtual ~PeasantInstance();
 
+	// Move constructor (this doesnt' copy parent member variables, do this on your own)
+	PeasantInstance(PeasantInstance&& _other);
+
+	// Move assignment constructor (this doesnt' copy parent member variables, do this on your own)
+	PeasantInstance& operator=(PeasantInstance&& _other);
+
 //////////////////
 // MAIN METHODS //
 public: //////////
-
-	// Add a dependency to another instance
-	void AddInstanceDependency(PeasantInstance& _instance);
 
 	// Return if this object is locked
 	bool IsLocked();
@@ -84,6 +87,14 @@ public: //////////
 	// Return if all dependencies are fulfilled
 	bool AreDependenciesFulfilled();
 
+	// Request a duplicated reference for this instance (this doesnt' duplicate parent member variables, do this on your own)
+	bool RequestDuplicate(PeasantInstance& _other);
+
+protected:
+
+	// Add a dependency to another instance
+	void AddInstanceDependency(PeasantInstance& _instance);
+
 	// Return the object ptr
 	PeasantObject* GetObjectPtr();
 
@@ -95,6 +106,9 @@ public: //////////
 	}
 
 protected:
+
+	// Register the hash and the manager for this instance
+	void RegisterInfo(PeasantHash _hash, PeasantObjectManager* _manager);
 
 	// Unlock this instance to be used by the world
 	void Unlock();
@@ -133,6 +147,15 @@ private: //////
 
 	// The instance that depends on this one
 	PeasantInstance* m_LinkedInstanceDependency;
+
+	// The hash object
+	PeasantHash m_Hash;
+
+	// The object manager reference
+	PeasantObjectManager* m_ObjectManager;
+
+	// The factory ptr
+	PeasantObjectFactory* m_FactoryPtr;
 };
 
 // Peasant

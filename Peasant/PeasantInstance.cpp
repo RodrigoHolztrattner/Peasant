@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "PeasantInstance.h"
 #include "PeasantObjectFactory.h"
+#include "PeasantObjectManager.h"
 
 #include <cassert>
 
@@ -16,10 +17,67 @@ PeasantInstance::PeasantInstance()
 	m_DependencyCount = 0;
 	m_LinkedInstanceDependency = nullptr;
 	m_ReferenceObject = nullptr;
+	m_Hash = PeasantHash();
+	m_ObjectManager = nullptr;
+	m_FactoryPtr = nullptr;
 }
 
 PeasantInstance::~PeasantInstance()
 {
+}
+
+PeasantInstance::PeasantInstance(PeasantInstance&& _other)
+{
+	// Check if this instance is not being loaded or if it was completly loaded
+	assert(!m_IsLocked && (!AreDependenciesFulfilled() || !WasLoaded()));
+
+	// Set the data for this object
+	m_IsLocked = _other.m_IsLocked;
+	m_ReferenceObject = _other.m_ReferenceObject;
+	m_DependencyCount.exchange(_other.m_DependencyCount);
+	m_LinkedInstanceDependency = _other.m_LinkedInstanceDependency;
+	m_Hash = _other.m_Hash;
+	m_ObjectManager = _other.m_ObjectManager;
+	m_FactoryPtr = _other.m_FactoryPtr;
+
+	// Set the data for the other object
+	m_IsLocked = true;
+	m_ReferenceObject = nullptr;
+	m_DependencyCount = 0;
+	m_LinkedInstanceDependency = nullptr;
+	m_Hash = PeasantHash();
+	m_ObjectManager = nullptr;
+	m_FactoryPtr = nullptr;
+}
+
+PeasantInstance& PeasantInstance::operator=(PeasantInstance&& _other)
+{
+	// Check if this instance isn't loaded
+	assert(!(m_IsLocked || !AreDependenciesFulfilled() || !WasLoaded()));
+
+	// We can't assign to the same object
+	if (this != &_other)
+	{
+		// Set the data for this object
+		m_IsLocked = _other.m_IsLocked;
+		m_ReferenceObject = _other.m_ReferenceObject;
+		m_DependencyCount.exchange(_other.m_DependencyCount);
+		m_LinkedInstanceDependency = _other.m_LinkedInstanceDependency;
+		m_Hash = _other.m_Hash;
+		m_ObjectManager = _other.m_ObjectManager;
+		m_FactoryPtr = _other.m_FactoryPtr;
+
+		// Set the data for the other object
+		m_IsLocked = true;
+		m_ReferenceObject = nullptr;
+		m_DependencyCount = 0;
+		m_LinkedInstanceDependency = nullptr;
+		m_Hash = PeasantHash();
+		m_ObjectManager = nullptr;
+		m_FactoryPtr = nullptr;
+	}
+
+	return *this;
 }
 
 void PeasantInstance::AddInstanceDependency(PeasantInstance& _instance)
@@ -47,19 +105,34 @@ bool PeasantInstance::AreDependenciesFulfilled()
 	return m_DependencyCount == 0;
 }
 
+bool PeasantInstance::RequestDuplicate(PeasantInstance& _other)
+{
+	// Check if this instance was completly loaded
+	assert(m_IsLocked || !AreDependenciesFulfilled() || !WasLoaded());
+
+	// Request a new object for this instance
+	return m_ObjectManager->RequestObject(this, m_Hash, m_FactoryPtr, false);
+}
+
 bool PeasantInstance::WasLoaded()
 {
-	return m_ReferenceObject->WasLoaded();
+	return m_ReferenceObject != nullptr && m_ReferenceObject->WasLoaded();
 }
 
 bool PeasantInstance::WasSynchronized()
 {
-	return m_ReferenceObject->WasSynchronized();
+	return m_ReferenceObject != nullptr && m_ReferenceObject->WasSynchronized();
 }
 
 bool PeasantInstance::IsLocked()
 {
 	return m_IsLocked;
+}
+
+void PeasantInstance::RegisterInfo(PeasantHash _hash, PeasantObjectManager* _manager)
+{
+	m_Hash = _hash;
+	m_ObjectManager = _manager;
 }
 
 void PeasantInstance::Unlock()

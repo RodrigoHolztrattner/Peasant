@@ -26,6 +26,9 @@ PeasantObjectManager::~PeasantObjectManager()
 
 bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
+	// Register the hash and this reference for this instance
+	_instance->RegisterInfo(_hash, this);
+
 	// Check if we already have an object with this hash, if the ibject was loaded and if we can construct this instance asynchronous
 	PeasantObject* object = m_StorageReference.FindObject(_hash);
 	if (object != nullptr && object->WasLoaded() && object->WasSynchronized() && _allowAsynchronousConstruct)

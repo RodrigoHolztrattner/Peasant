@@ -103,6 +103,7 @@ struct PeasantHash
 	PeasantHash(const char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
 	PeasantHash(char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
 	PeasantHash(const std::string _str, uint64_t _flags = 0) : hash(HashString(_str.c_str())), flags(_flags) {}
+	PeasantHash(uint64_t _hash) : hash(_hash), flags(0) {}
 
 	// Compare operator
 	bool operator<(const PeasantHash& _other) const

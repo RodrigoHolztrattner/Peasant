@@ -99,11 +99,19 @@ struct PeasantHash
 		hash = flags = 0;
 	}
 
+#ifndef NDEBUG
+#define RegisterString(x)	,internalString(x)
+#else
+#define RegisterString(x)	
+#endif
+
 	// Construct with input
-	PeasantHash(const char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
-	PeasantHash(char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) {}
-	PeasantHash(const std::string _str, uint64_t _flags = 0) : hash(HashString(_str.c_str())), flags(_flags) {}
+	PeasantHash(const char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) RegisterString(_str) {}
+	PeasantHash(char* _str, uint64_t _flags = 0) : hash(HashString(_str)), flags(_flags) RegisterString(_str) {}
+	PeasantHash(const std::string _str, uint64_t _flags = 0) : hash(HashString(_str.c_str())), flags(_flags) RegisterString(_str) {}
 	PeasantHash(uint64_t _hash) : hash(_hash), flags(0) {}
+
+#undef RegisterString
 
 	// Compare operator
 	bool operator<(const PeasantHash& _other) const
@@ -121,6 +129,11 @@ struct PeasantHash
 
 	// The flag value
 	uint64_t flags;
+
+#ifndef NDEBUG
+	// A internal string that was hashed (used only on debug)
+	std::string internalString;
+#endif
 };
 
 PeasantDevelopmentNamespaceEnd(Peasant)

@@ -31,7 +31,7 @@ PeasantObjectManager::~PeasantObjectManager()
 bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
 	// Asserts
-	assert(!m_InUpdatePhase);
+	assert(!m_InUpdatePhase || (m_InUpdatePhase && std::this_thread::get_id() == m_UpdateThreadID));
 
 	// Register the hash and this reference for this instance
 	_instance->RegisterInfo(_hash, this);
@@ -61,7 +61,7 @@ bool PeasantObjectManager::RequestObject(PeasantInstance* _instance, PeasantHash
 bool PeasantObjectManager::RequestPersistentObject(PeasantInstance* _instance, PeasantHash _hash, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousConstruct)
 {
 	// Asserts
-	assert(!m_InUpdatePhase);
+	assert(!m_InUpdatePhase || (m_InUpdatePhase && std::this_thread::get_id() == m_UpdateThreadID));
 
 	// Register the hash and this reference for this instance
 	_instance->RegisterInfo(_hash, this);
@@ -94,7 +94,7 @@ bool PeasantObjectManager::RequestPersistentObject(PeasantInstance* _instance, P
 void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
 {
 	// Asserts
-	assert(!m_InUpdatePhase);
+	assert(!m_InUpdatePhase || (m_InUpdatePhase && std::this_thread::get_id() == m_UpdateThreadID));
 
 	// Create the new release request
 	ObjectRelease release = { _instance->GetObjectPtr(), _factoryPtr, !_allowAsynchronousDeletion };
@@ -106,7 +106,7 @@ void PeasantObjectManager::ReleaseObject(PeasantInstance* _instance, PeasantObje
 void PeasantObjectManager::ReleaseObject(PeasantObject* _object, PeasantObjectFactory* _factoryPtr, bool _allowAsynchronousDeletion)
 {
 	// Asserts
-	assert(!m_InUpdatePhase);
+	assert(!m_InUpdatePhase || (m_InUpdatePhase && std::this_thread::get_id() == m_UpdateThreadID));
 
 	// Create the new temporary release request
 	TemporaryObjectRelease release = { _object, _factoryPtr, !_allowAsynchronousDeletion };
@@ -122,6 +122,7 @@ void PeasantObjectManager::Update()
 
 	// Begin the update phase
 	m_InUpdatePhase = true;
+	m_UpdateThreadID = std::this_thread::get_id();
 
 	// For each request, run the process method
 	m_ObjectRequests.ProcessAll([&](ObjectRequest& _requestData)

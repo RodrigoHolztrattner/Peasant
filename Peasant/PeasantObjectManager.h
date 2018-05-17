@@ -142,8 +142,9 @@ private: //////
 	// The object storage reference
 	PeasantStorage& m_StorageReference;
 	
-	// If we are inside the update phase (used for asserts only)
+	// If we are inside the update phase and the updating thread id (used for asserts only)
 	bool m_InUpdatePhase;
+	std::thread::id m_UpdateThreadID;
 };
 
 // Peasant

@@ -143,6 +143,9 @@ void PeasantObjectManager::Update()
 
 			// Insert this file into the load queue
 			m_ObjectLoader.LoadObject(object, _requestData.hash, _requestData.isPermanent);
+
+			// Insert the new object into the storage
+			m_StorageReference.InsertObject(object, _requestData.hash);
 		}
 
 		// Make the instance reference it
